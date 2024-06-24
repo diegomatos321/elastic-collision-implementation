@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelagem de Colisões Elasticas</title>
+    <script type="text/javascript" src="https://unpkg.com/@babel/polyfill@7.0.0/dist/polyfill.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/vtk.js@30.7.1/vtk.js"></script>
+</head>
+<body>
+    <main>
+        <section>
+            <div>
+                <h1>Modelagem de Colisões Elásticas</h1>
+                <p>Trabalho final da disciplina Modelagem Matemática e Computacional</p>
+            </div>
+
+
+        </section>
+    </main>
+
+    <script>
+        let actor1 = vtk.Rendering.Core.vtkActor.newInstance();
+        let actor2 = vtk.Rendering.Core.vtkActor.newInstance();
+        let fullScreenRenderer = vtk.Rendering.Misc.vtkFullScreenRenderWindow.newInstance();
+
+        // Condições iniciais das esferas
+        let sphere1 = { 
+            mass: 1,
+            position: {
+                x: 0,
+                y: 0,
+                z: 0
+            },
+            velocity: {
+                x: 1,
+                y: 0,
+                z: 0
+            }
+        }
+        let sphere2 = {
+            mass: 1,
+            position: {
+                x: 5,
+                y: 0,
+                z: 0
+            },
+            velocity: {
+                x: 0,
+                y: 0,
+                z: 0
+            }
+        }
+
+        init()
+        function init() {
+            let sphereSource1 = vtk.Filters.Sources.vtkSphereSource.newInstance();
+            sphereSource1.setPhiResolution(100)
+            sphereSource1.setThetaResolution(100)
+            let mapper1 = vtk.Rendering.Core.vtkMapper.newInstance();
+            mapper1.setInputConnection(sphereSource1.getOutputPort());
+            // actor = vtk.Rendering.Core.vtkActor.newInstance();
+            actor1.setMapper(mapper1);
+            actor1.setPosition([sphere1.position.x, sphere1.position.y, sphere1.position.z])
+            
+            let sphereSource2 = vtk.Filters.Sources.vtkSphereSource.newInstance();
+            sphereSource2.setPhiResolution(100)
+            sphereSource2.setThetaResolution(100)
+            let mapper2 = vtk.Rendering.Core.vtkMapper.newInstance();
+            mapper2.setInputConnection(sphereSource2.getOutputPort());
+            // actor = vtk.Rendering.Core.vtkActor.newInstance();
+            actor2.setMapper(mapper2);
+            actor2.setPosition([sphere2.position.x, sphere2.position.y, sphere2.position.z])
+            
+            // fullScreenRenderer = vtk.Rendering.Misc.vtkFullScreenRenderWindow.newInstance();
+            let renderer = fullScreenRenderer.getRenderer();
+            renderer.addActor(actor1);
+            renderer.addActor(actor2);
+            renderer.resetCamera();
+
+            let renderWindow = fullScreenRenderer.getRenderWindow();
+            renderWindow.render();
+        }
+
+        // https://studiofreya.com/3d-math-and-physics/simple-sphere-sphere-collision-detection-and-collision-response/
+        function colidiuEsfera(esfera1, esfera2) {
+            const distance = {
+                x: esfera2.position.x - esfera1.position.x,
+                y: esfera2.position.y - esfera1.position.y,
+                z: esfera2.position.z - esfera1.position.z
+            }
+            const distanceLength = Math.sqrt(Math.pow(distance.x, 2) + Math.pow(distance.y, 2) + Math.pow(distance.y, 2))
+            const sumOfRadius = 0.5 + 0.5 // Valores padrão do Vtk
+
+            return distanceLength < sumOfRadius;
+        }
+
+        let previousTimestamp = 0
+        anim()
+
+        // timeStamp: number -> tempo percorrido em milisegundos
+        function anim(timeStamp) {
+            console.log("Animando...")
+            if (timeStamp === undefined) {
+                timeStamp = 0
+            }
+            const dt = (timeStamp - previousTimestamp) / 1000 // Proximo passo da animação em segundos
+            previousTimestamp = timeStamp
+
+            sphere1.position.x = sphere1.position.x + sphere1.velocity.x * dt
+            sphere1.position.y = sphere1.position.y + sphere1.velocity.y * dt // Esses caras vão ser zero
+            sphere1.position.z = sphere1.position.z + sphere1.velocity.z * dt // Esses caras vão ser zero
+
+            sphere2.position.x = sphere2.position.x + sphere2.velocity.x * dt
+            sphere2.position.y = sphere2.position.y + sphere2.velocity.y * dt // Esses caras vão ser zero
+            sphere2.position.z = sphere2.position.z + sphere2.velocity.z * dt // Esses caras vão ser zero
+
+            if (colidiuEsfera(sphere1, sphere2)) {
+                v1x = (2*sphere2.mass / (sphere1.mass + sphere2.mass)) * sphere2.velocity.x + ((sphere1.mass - sphere1.mass) / (sphere1.mass + sphere2.mass)) * sphere1.velocity.x
+                v1y = (2*sphere2.mass / (sphere1.mass + sphere2.mass)) * sphere2.velocity.y + ((sphere1.mass - sphere1.mass) / (sphere1.mass + sphere2.mass)) * sphere1.velocity.y
+                v1z = (2*sphere2.mass / (sphere1.mass + sphere2.mass)) * sphere2.velocity.z + ((sphere1.mass - sphere1.mass) / (sphere1.mass + sphere2.mass)) * sphere1.velocity.z
+
+                v2x = (2*sphere1.mass / (sphere1.mass + sphere2.mass)) * sphere1.velocity.x + ((sphere2.mass - sphere1.mass) / (sphere1.mass + sphere2.mass)) * sphere2.velocity.x
+                v2y = (2*sphere1.mass / (sphere1.mass + sphere2.mass)) * sphere1.velocity.y + ((sphere2.mass - sphere1.mass) / (sphere1.mass + sphere2.mass)) * sphere2.velocity.y
+                v2z = (2*sphere1.mass / (sphere1.mass + sphere2.mass)) * sphere1.velocity.z + ((sphere2.mass - sphere1.mass) / (sphere1.mass + sphere2.mass)) * sphere2.velocity.z
+
+                // Atualizo com novos valores
+                sphere1.velocity.x = v1x
+                sphere1.velocity.y = v1y
+                sphere1.velocity.z = v1z
+
+                sphere2.velocity.x = v2x
+                sphere2.velocity.y = v2y
+                sphere2.velocity.z = v2z
+            }
+
+            actor1.setPosition([sphere1.position.x, sphere1.position.y, actor1.getPosition()[2]])
+            actor2.setPosition([sphere2.position.x, sphere2.position.y, actor2.getPosition()[2]])
+            
+            var renderWindow = fullScreenRenderer.getRenderWindow();
+            renderWindow.render();
+            
+            // Apenas 10s de animação
+            if (timeStamp < 1000 * 10) {
+                window.requestAnimationFrame(anim)
+            }
+        }
+    </script>
+</body>
+</html>
