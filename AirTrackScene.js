@@ -1,17 +1,17 @@
 import colidiuEsfera from "./CollisionTest.js"
 
-export default class Scene3 {
+export default class AirTrackScene {
     sphere1 = {
         mass: 1,
         k: 1, // Coeficiente de reestituição,
         radius: 0.5, // valor padrão do VTK
         position: {
-            x: -5,
-            y: 2,
+            x: -3,
+            y: 1.5,
             z: 0
         },
         velocity: {
-            x: 1,
+            x: 2,
             y: 0,
             z: 0
         },
@@ -23,7 +23,7 @@ export default class Scene3 {
         vtkActorRef: null
     }
     sphere2 = {
-        mass: 1,
+        mass: 2,
         k: 1, // Coeficiente de reestituição,
         radius: 0.5, // valor padrão do VTK
         position: {
@@ -133,18 +133,19 @@ export default class Scene3 {
             normal.x /= normalLength
             normal.y /= normalLength
 
-            let penetration1 = {
+            let penetration = {
                 x: this.sphere1.velocity.x - this.sphere2.velocity.x,
                 y: this.sphere1.velocity.y - this.sphere2.velocity.y
             }
 
-            let contactMagnitude = -this.sphere1.k * (penetration1.x*normal.x + penetration1.y*normal.y ) // Isso é um escalar
+            let contactMagnitude = -(1+this.sphere1.k) * (penetration.x*normal.x + penetration.y*normal.y ) / ((1/this.sphere1.mass) + (1/this.sphere2.mass)) // Isso é um escalar
             let contactForce = {
                 x: normal.x * contactMagnitude,
                 y: normal.y * contactMagnitude
             }
             forces1.push(contactForce)
 
+            // let contactMagnitude2 = -this.sphere2.k * (penetration.x*normal.x + penetration.y*normal.y ) / ((1/this.sphere1.mass) + (1/this.sphere2.mass)) // Isso é um escalar
             let contactForce2 = {
                 x: -normal.x * contactMagnitude,
                 y: -normal.y * contactMagnitude
@@ -167,7 +168,6 @@ export default class Scene3 {
 
         this.sphere1.position.x = this.sphere1.position.x + this.sphere1.velocity.x*dt + this.sphere1.acc.x*Math.pow(dt,2)
         this.sphere1.position.y = this.sphere1.position.y + this.sphere1.velocity.y*dt + this.sphere1.acc.y*Math.pow(dt,2)
-
 
         let totalForces2X = 0
         let totalForces2Y = 0

@@ -1,7 +1,7 @@
 export default class Scene1 {
     sphere = {
         mass: 1,
-        k: 0.9, // Coeficiente de reestituição,
+        k: 1, // Coeficiente de reestituição,
         radius: 0.5, // valor padrão do VTK
         position: {
             x: -5,

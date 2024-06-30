@@ -1,7 +1,7 @@
-export default class Scene1 {
+export default class BouncingBallScene {
     sphere = {
         mass: 1,
-        k: 1, // Coeficiente de reestituição,
+        k: 0.9, // Coeficiente de reestituição,
         radius: 0.5, // valor padrão do VTK
         position: {
             x: 0,
@@ -9,7 +9,7 @@ export default class Scene1 {
             z: 0
         },
         velocity: {
-            x: 0,
+            x: 1,
             y: 0,
             z: 0
         },
@@ -98,7 +98,7 @@ export default class Scene1 {
         
         // Imagine um chão na posicao (0, 1)
         let distanceToGround = Math.pow(this.sphere.position.y - 1, 2)
-        if (distanceToGround - Math.pow(this.sphere.radius,2) <= 0.001) {
+        if (distanceToGround - Math.pow(this.sphere.radius,2) <= 0.01) {
             console.log("Contact Force")
 
             let penetration = this.sphere.velocity.y
@@ -106,6 +106,7 @@ export default class Scene1 {
                 x: 0,
                 y: -this.sphere.k*penetration
             }
+
             forces.push(contactForce)
 
             let normalWeight = {

@@ -8,5 +8,5 @@ export default function colidiuEsfera(esfera1, esfera2) {
     const distanceLength = Math.pow(distance.x, 2) + Math.pow(distance.y, 2) + Math.pow(distance.y, 2)
     const sumOfRadius = Math.pow(esfera1.radius + esfera1.radius, 2) // Valores padrão do Vtk
 
-    return distanceLength - sumOfRadius < 0.001 ;
+    return distanceLength - sumOfRadius < 0.01 ;
 }
